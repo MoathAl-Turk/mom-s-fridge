@@ -29,6 +29,7 @@ const roleSelection = document.getElementById('role-selection');
 const passwordSection = document.getElementById('password-section');
 const momPasswordInput = document.getElementById('mom-password');
 const passwordError = document.getElementById('password-error');
+
 // Log in
 document.getElementById('sibling-login-btn').addEventListener('click', () => {
     localStorage.setItem('isMom', 'false');
@@ -66,9 +67,9 @@ onAuthStateChanged(auth, (user) => {
         mainApp.style.display = 'block';
         greeting.innerText = `Hello, ${user.displayName}!`;
 
-        // IMPORTANT: Put your mom's exact Google email here
-       const isMom = localStorage.getItem('isMom') === 'true';
-if (isMom) {
+        const isMom = localStorage.getItem('isMom') === 'true';
+        
+        if (isMom) {
             // Unhide Mom's special buttons
             momControls.style.display = 'block';
             momPollControls.style.display = 'block';
@@ -81,9 +82,25 @@ if (isMom) {
         // Listen for fridge items from the database in real-time
         onSnapshot(collection(db, "fridge"), (snapshot) => {
             fridgeList.innerHTML = ''; // clear the old list
-            snapshot.forEach((doc) => {
+            
+            snapshot.forEach((docItem) => {
                 const li = document.createElement('li');
-                li.innerText = doc.data().name;
+                li.innerText = docItem.data().name;
+                li.style.marginBottom = "8px";
+
+                // If Mom is logged in, add a delete button next to the item
+                if (isMom) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerText = "X";
+                    deleteBtn.style.backgroundColor = "#d62828"; 
+                    deleteBtn.style.padding = "2px 6px";
+                    deleteBtn.style.marginLeft = "10px";
+                    
+                    deleteBtn.addEventListener('click', async () => {
+                        await deleteDoc(doc(db, "fridge", docItem.id));
+                    });
+                    li.appendChild(deleteBtn);
+                }
                 fridgeList.appendChild(li);
             });
         });
@@ -105,6 +122,7 @@ document.getElementById('add-item-btn').addEventListener('click', async () => {
         itemInput.value = ""; // clear the box
     }
 });
+
 // 1. Submit a dinner suggestion
 document.getElementById('submit-note-btn').addEventListener('click', async () => {
     const noteInput = document.getElementById('dinner-note');
@@ -123,15 +141,32 @@ document.getElementById('submit-note-btn').addEventListener('click', async () =>
 onSnapshot(collection(db, "suggestions"), (snapshot) => {
     const allNotesDiv = document.getElementById('all-notes');
     allNotesDiv.innerHTML = ''; // clear the old list
+    const isMom = localStorage.getItem('isMom') === 'true';
     
-    snapshot.forEach((doc) => {
-        const data = doc.data();
-        const noteElement = document.createElement('p');
-        // This makes it look like: "moath: maftool"
-        noteElement.innerHTML = `<strong style="color: #f4a261;">${data.author}:</strong> ${data.text}`;
-        allNotesDiv.appendChild(noteElement);
+    snapshot.forEach((docItem) => {
+        const data = docItem.data();
+        const noteContainer = document.createElement('div');
+        noteContainer.style.marginBottom = '10px';
+        
+        noteContainer.innerHTML = `<strong style="color: #f4a261;">${data.author}:</strong> ${data.text}`;
+        
+        // If Mom is logged in, add a delete button next to the suggestion
+        if (isMom) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerText = "Delete";
+            deleteBtn.style.backgroundColor = "#d62828";
+            deleteBtn.style.padding = "2px 6px";
+            deleteBtn.style.marginLeft = "10px";
+            
+            deleteBtn.addEventListener('click', async () => {
+                await deleteDoc(doc(db, "suggestions", docItem.id));
+            });
+            noteContainer.appendChild(deleteBtn);
+        }
+        allNotesDiv.appendChild(noteContainer);
     });
 });
+
 // --- POLL LOGIC ---
 
 // 1. Mom creates the poll
@@ -195,4 +230,9 @@ onSnapshot(doc(db, "polls", "current"), (docSnapshot) => {
     } else {
         activePollDiv.innerHTML = "<p>Mom hasn't created a poll for tonight yet!</p>";
     }
+});
+
+// 3. Mom deletes the poll
+document.getElementById('delete-poll-btn').addEventListener('click', async () => {
+    await deleteDoc(doc(db, "polls", "current"));
 });
