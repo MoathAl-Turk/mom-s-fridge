@@ -20,6 +20,11 @@ body.dark-mode {
     --shadow: 0 4px 15px rgba(193, 154, 107, 0.2);
 }
 
+/* Apply box-sizing globally so padding doesn't break mobile widths */
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -97,4 +102,48 @@ section, #login-screen {
 ul {
     list-style-type: square;
     color: var(--text-color);
+    padding-left: 20px;
+}
+
+/* --- MOBILE RESPONSIVENESS (Phones up to 600px wide) --- */
+@media (max-width: 600px) {
+    body {
+        /* Extra padding at the top so the theme button doesn't cover the title */
+        padding: 70px 10px 20px 10px; 
+    }
+    
+    section, #login-screen {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+        letter-spacing: 1px;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    /* Force text boxes to stretch across the whole phone screen */
+    input, textarea {
+        max-width: 100%; 
+    }
+
+    /* Stack buttons vertically on phones */
+    button {
+        width: 100%; 
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    /* Keep the theme button small and tucked in the corner */
+    .theme-btn {
+        width: auto; 
+        padding: 8px 12px;
+        top: 15px;
+        right: 15px;
+        font-size: 0.8em;
+    }
 }
