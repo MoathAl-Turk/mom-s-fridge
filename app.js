@@ -85,3 +85,30 @@ document.getElementById('add-item-btn').addEventListener('click', async () => {
         itemInput.value = ""; // clear the box
     }
 });
+// 1. Submit a dinner suggestion
+document.getElementById('submit-note-btn').addEventListener('click', async () => {
+    const noteInput = document.getElementById('dinner-note');
+    const user = auth.currentUser;
+    
+    if (noteInput.value !== "" && user) {
+        await addDoc(collection(db, "suggestions"), {
+            text: noteInput.value,
+            author: user.displayName
+        });
+        noteInput.value = ""; // clear the box after sending
+    }
+});
+
+// 2. Listen for suggestions and show them to everyone
+onSnapshot(collection(db, "suggestions"), (snapshot) => {
+    const allNotesDiv = document.getElementById('all-notes');
+    allNotesDiv.innerHTML = ''; // clear the old list
+    
+    snapshot.forEach((doc) => {
+        const data = doc.data();
+        const noteElement = document.createElement('p');
+        // This makes it look like: "moath: maftool"
+        noteElement.innerHTML = `<strong style="color: #f4a261;">${data.author}:</strong> ${data.text}`;
+        allNotesDiv.appendChild(noteElement);
+    });
+});
