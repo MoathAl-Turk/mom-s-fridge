@@ -16,6 +16,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// --- THEME TOGGLE LOGIC ---
+const themeToggleBtn = document.getElementById('theme-toggle');
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+}
+themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
+});
+// --------------------------
+
 const loginScreen = document.getElementById('login-screen');
 const mainApp = document.getElementById('main-app');
 const greeting = document.getElementById('greeting');
@@ -82,6 +97,7 @@ onAuthStateChanged(auth, (user) => {
                     const deleteBtn = document.createElement('button');
                     deleteBtn.innerText = "X";
                     deleteBtn.style.backgroundColor = "#d62828"; 
+                    deleteBtn.style.color = "white";
                     deleteBtn.style.padding = "2px 6px";
                     deleteBtn.style.marginLeft = "10px";
                     
@@ -115,7 +131,6 @@ document.getElementById('submit-note-btn').addEventListener('click', async () =>
     const user = auth.currentUser;
     
     if (noteInput.value !== "" && user) {
-        // UPDATED: Now saving the user's specific UID so they can delete it later
         await addDoc(collection(db, "suggestions"), {
             text: noteInput.value,
             author: user.displayName,
@@ -136,14 +151,15 @@ onSnapshot(collection(db, "suggestions"), (snapshot) => {
         const noteContainer = document.createElement('div');
         noteContainer.style.marginBottom = '10px';
         
-        noteContainer.innerHTML = `<strong style="color: #f4a261;">${data.author}:</strong> ${data.text}`;
+        // Changed to use CSS variable for author name color
+        noteContainer.innerHTML = `<strong style="color: var(--primary-accent);">${data.author}:</strong> ${data.text}`;
         
-        // UPDATED: Show delete button if the user is Mom OR if they are the sibling who wrote it
         const isMyNote = currentUser && data.uid === currentUser.uid;
         if (isMom || isMyNote) {
             const deleteBtn = document.createElement('button');
             deleteBtn.innerText = "Delete";
             deleteBtn.style.backgroundColor = "#d62828";
+            deleteBtn.style.color = "white";
             deleteBtn.style.padding = "2px 6px";
             deleteBtn.style.marginLeft = "10px";
             
@@ -177,21 +193,20 @@ onSnapshot(doc(db, "polls", "current"), (docSnapshot) => {
     if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         const user = auth.currentUser;
-        
         const hasVoted = user && data.voters.includes(user.uid);
 
-        // UPDATED: Added the warning note above the options
+        // Changed poll boxes to use CSS variables so they swap colors properly
         activePollDiv.innerHTML = `
-            <p style="color: #e76f51; font-size: 0.9em; font-style: italic; margin-bottom: 15px;">* if u vote u cant change your vote</p>
-            <div style="margin-bottom: 15px; background-color: #4a3b32; padding: 10px; border-radius: 5px;">
+            <p style="color: #d62828; font-size: 0.9em; font-style: italic; margin-bottom: 15px;">* if u vote u cant change your vote</p>
+            <div style="margin-bottom: 15px; background-color: var(--bg-color); border: 1px solid var(--border-color); padding: 10px; border-radius: 5px;">
                 <strong>${data.option1.name}</strong>: ${data.option1.votes} votes
                 ${!hasVoted ? `<button id="vote-opt1" style="margin-left: 10px;">Vote</button>` : ''}
             </div>
-            <div style="background-color: #4a3b32; padding: 10px; border-radius: 5px;">
+            <div style="background-color: var(--bg-color); border: 1px solid var(--border-color); padding: 10px; border-radius: 5px;">
                 <strong>${data.option2.name}</strong>: ${data.option2.votes} votes
                 ${!hasVoted ? `<button id="vote-opt2" style="margin-left: 10px;">Vote</button>` : ''}
             </div>
-            ${hasVoted ? `<p style="color: #8ab17d; margin-top: 10px;">Thanks for voting!</p>` : ''}
+            ${hasVoted ? `<p style="color: var(--primary-accent); margin-top: 10px; font-weight: bold;">Thanks for voting!</p>` : ''}
         `;
 
         if (!hasVoted && user) {
