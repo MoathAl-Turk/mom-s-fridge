@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 1. REPLACE THIS WITH YOUR FIREBASE CONFIG FROM STEP 2
 const firebaseConfig = {
@@ -131,4 +131,68 @@ onSnapshot(collection(db, "suggestions"), (snapshot) => {
         noteElement.innerHTML = `<strong style="color: #f4a261;">${data.author}:</strong> ${data.text}`;
         allNotesDiv.appendChild(noteElement);
     });
+});
+// --- POLL LOGIC ---
+
+// 1. Mom creates the poll
+document.getElementById('create-poll-btn').addEventListener('click', async () => {
+    const opt1 = document.getElementById('poll-option-1').value;
+    const opt2 = document.getElementById('poll-option-2').value;
+
+    if (opt1 !== "" && opt2 !== "") {
+        // We use a specific document ID called "current" so it always overwrites yesterday's poll
+        await setDoc(doc(db, "polls", "current"), {
+            option1: { name: opt1, votes: 0 },
+            option2: { name: opt2, votes: 0 },
+            voters: [] // An empty list to track who has voted today
+        });
+        // Clear the boxes after sending
+        document.getElementById('poll-option-1').value = "";
+        document.getElementById('poll-option-2').value = "";
+    }
+});
+
+// 2. Everyone sees the poll and can vote
+onSnapshot(doc(db, "polls", "current"), (docSnapshot) => {
+    const activePollDiv = document.getElementById('active-poll');
+    
+    if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        const user = auth.currentUser;
+        
+        // Check if the currently logged-in user is already in the voters list
+        const hasVoted = user && data.voters.includes(user.uid);
+
+        // Draw the poll on the screen
+        activePollDiv.innerHTML = `
+            <div style="margin-bottom: 15px; background-color: #4a3b32; padding: 10px; border-radius: 5px;">
+                <strong>${data.option1.name}</strong>: ${data.option1.votes} votes
+                ${!hasVoted ? `<button id="vote-opt1" style="margin-left: 10px;">Vote</button>` : ''}
+            </div>
+            <div style="background-color: #4a3b32; padding: 10px; border-radius: 5px;">
+                <strong>${data.option2.name}</strong>: ${data.option2.votes} votes
+                ${!hasVoted ? `<button id="vote-opt2" style="margin-left: 10px;">Vote</button>` : ''}
+            </div>
+            ${hasVoted ? `<p style="color: #8ab17d; margin-top: 10px;">Thanks for voting!</p>` : ''}
+        `;
+
+        // If they haven't voted, make the vote buttons actually add a point
+        if (!hasVoted && user) {
+            document.getElementById('vote-opt1').addEventListener('click', async () => {
+                await updateDoc(doc(db, "polls", "current"), {
+                    "option1.votes": data.option1.votes + 1,
+                    voters: arrayUnion(user.uid) // Adds them to the list so they can't vote again
+                });
+            });
+
+            document.getElementById('vote-opt2').addEventListener('click', async () => {
+                await updateDoc(doc(db, "polls", "current"), {
+                    "option2.votes": data.option2.votes + 1,
+                    voters: arrayUnion(user.uid)
+                });
+            });
+        }
+    } else {
+        activePollDiv.innerHTML = "<p>Mom hasn't created a poll for tonight yet!</p>";
+    }
 });
