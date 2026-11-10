@@ -8,6 +8,9 @@
     <script type="module" src="app.js"></script>
 </head>
 <body>
+    <!-- New Theme Button -->
+    <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
+
     <div id="login-screen">
         <h1>Welcome to the Family Fridge</h1>
         
@@ -19,7 +22,7 @@
         <div id="password-section" style="display: none; margin-top: 15px;">
             <input type="password" id="mom-password" placeholder="Enter Mom's Password">
             <button id="verify-password-btn">Submit Password</button>
-            <p id="password-error" style="color: #e76f51; display: none;">Incorrect password!</p>
+            <p id="password-error" style="color: #d62828; display: none;">Incorrect password!</p>
         </div>
     </div>
 
@@ -50,12 +53,12 @@
             <h2>Tonight's Dinner Poll</h2>
             <div id="active-poll"></div>
             
-           <div id="mom-poll-controls" style="display: none;">
-    <input type="text" id="poll-option-1" placeholder="Option 1">
-    <input type="text" id="poll-option-2" placeholder="Option 2">
-    <button id="create-poll-btn">Create Poll</button>
-    <button id="delete-poll-btn" style="background-color: #d62828;">Delete Poll</button>
-</div>
+            <div id="mom-poll-controls" style="display: none;">
+                <input type="text" id="poll-option-1" placeholder="Option 1">
+                <input type="text" id="poll-option-2" placeholder="Option 2">
+                <button id="create-poll-btn">Create Poll</button>
+                <button id="delete-poll-btn" style="background-color: #d62828;">Delete Poll</button>
+            </div>
         </section>
     </div>
 </body>
