@@ -25,15 +25,36 @@ const greeting = document.getElementById('greeting');
 const momControls = document.getElementById('mom-controls');
 const momPollControls = document.getElementById('mom-poll-controls');
 const fridgeList = document.getElementById('fridge-list');
-
+const roleSelection = document.getElementById('role-selection');
+const passwordSection = document.getElementById('password-section');
+const momPasswordInput = document.getElementById('mom-password');
+const passwordError = document.getElementById('password-error');
 // Log in
-document.getElementById('login-btn').addEventListener('click', () => {
+document.getElementById('sibling-login-btn').addEventListener('click', () => {
+    localStorage.setItem('isMom', 'false');
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
 });
 
+document.getElementById('mom-login-btn').addEventListener('click', () => {
+    roleSelection.style.display = 'none';
+    passwordSection.style.display = 'block';
+});
+
+document.getElementById('verify-password-btn').addEventListener('click', () => {
+    if (momPasswordInput.value === "MOATH278") {
+        localStorage.setItem('isMom', 'true');
+        passwordError.style.display = 'none';
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider);
+    } else {
+        passwordError.style.display = 'block';
+    }
+});
+
 // Log out
 document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('isMom'); // This line clears the flag!
     signOut(auth);
 });
 
@@ -46,9 +67,8 @@ onAuthStateChanged(auth, (user) => {
         greeting.innerText = `Hello, ${user.displayName}!`;
 
         // IMPORTANT: Put your mom's exact Google email here
-        const MOMS_EMAIL = "yourmom@gmail.com"; 
-
-        if (user.email === MOMS_EMAIL) {
+       const isMom = localStorage.getItem('isMom') === 'true';
+if (isMom) {
             // Unhide Mom's special buttons
             momControls.style.display = 'block';
             momPollControls.style.display = 'block';
