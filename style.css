@@ -1,51 +1,100 @@
+/* LIGHT MODE (White & Dim Blue) */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #1a2530;
+    --primary-accent: #4a90e2; /* Dim Blue */
+    --secondary-bg: #f4f7f9;
+    --border-color: #b0c4de;
+    --btn-text: #ffffff;
+    --shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+}
+
+/* DARK MODE (Black & Light Brown) */
+body.dark-mode {
+    --bg-color: #000000;
+    --text-color: #e8dcc6;
+    --primary-accent: #c19a6b; /* Light Brown */
+    --secondary-bg: #111111;
+    --border-color: #3b2f28;
+    --btn-text: #000000;
+    --shadow: 0 4px 15px rgba(193, 154, 107, 0.2);
+}
+
 body {
-    background-color: #2c211b;
-    color: #e8dcc6;
-    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 40px 20px;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 h1, h2 {
-    color: #f4a261;
+    color: var(--primary-accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px var(--shadow);
+}
+
+/* Floating Theme Button */
+.theme-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: transparent;
+    color: var(--primary-accent);
+    border: 1px solid var(--primary-accent);
 }
 
 button {
-    background-color: #e76f51;
-    color: white;
+    background-color: var(--primary-accent);
+    color: var(--btn-text);
     border: none;
     padding: 10px 15px;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
     margin-right: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #d85a3c;
+    box-shadow: 0 0 12px var(--primary-accent);
+    transform: translateY(-1px);
 }
 
 input, textarea {
-    background-color: #4a3b32;
-    color: white;
-    border: 1px solid #7c5e48;
-    padding: 10px;
-    border-radius: 5px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 6px;
     width: 100%;
     max-width: 300px;
     margin-bottom: 10px;
     display: block;
+    outline: none;
+    transition: all 0.3s ease;
 }
 
-section {
-    background-color: #3b2f28;
-    padding: 20px;
-    border-radius: 10px;
+input:focus, textarea:focus {
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 8px var(--shadow);
+}
+
+section, #login-screen {
+    background-color: var(--secondary-bg);
+    padding: 25px;
+    border-radius: 12px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: all 0.4s ease;
 }
 
 ul {
     list-style-type: square;
-    color: #e8dcc6;
+    color: var(--text-color);
 }
