@@ -5,13 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mom's Fridge & Dinner Poll</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Load Firebase -->
     <script type="module" src="app.js"></script>
 </head>
 <body>
     <div id="login-screen">
         <h1>Welcome to the Family Fridge</h1>
-        <button id="login-btn">Log in with Google</button>
+        
+        <div id="role-selection">
+            <button id="sibling-login-btn">I am a Sibling</button>
+            <button id="mom-login-btn">I am Mom</button>
+        </div>
+        
+        <div id="password-section" style="display: none; margin-top: 15px;">
+            <input type="password" id="mom-password" placeholder="Enter Mom's Password">
+            <button id="verify-password-btn">Submit Password</button>
+            <p id="password-error" style="color: #e76f51; display: none;">Incorrect password!</p>
+        </div>
     </div>
 
     <div id="main-app" style="display: none;">
@@ -20,19 +29,16 @@
             <button id="logout-btn">Log Out</button>
         </header>
 
-        <!-- Everyone sees what's in the fridge -->
         <section id="fridge-section">
             <h2>What's in the Fridge?</h2>
             <ul id="fridge-list"></ul>
             
-            <!-- ONLY MOM SEES THIS -->
             <div id="mom-controls" style="display: none;">
                 <input type="text" id="new-item" placeholder="Add an item...">
                 <button id="add-item-btn">Add to Fridge</button>
             </div>
         </section>
 
-        <!-- Siblings leave notes here -->
         <section id="notes-section">
             <h2>Dinner Suggestions</h2>
             <textarea id="dinner-note" placeholder="What do you want for dinner?"></textarea>
@@ -40,12 +46,10 @@
             <div id="all-notes"></div>
         </section>
 
-        <!-- The Poll -->
         <section id="poll-section">
             <h2>Tonight's Dinner Poll</h2>
             <div id="active-poll"></div>
             
-            <!-- ONLY MOM SEES THIS -->
             <div id="mom-poll-controls" style="display: none;">
                 <input type="text" id="poll-option-1" placeholder="Option 1">
                 <input type="text" id="poll-option-2" placeholder="Option 2">
