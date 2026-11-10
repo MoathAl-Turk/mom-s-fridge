@@ -18,6 +18,7 @@ button {
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
+    margin-right: 5px;
 }
 
 button:hover {
@@ -33,6 +34,7 @@ input, textarea {
     width: 100%;
     max-width: 300px;
     margin-bottom: 10px;
+    display: block;
 }
 
 section {
