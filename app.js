@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 1. REPLACE THIS WITH YOUR FIREBASE CONFIG FROM STEP 2
 const firebaseConfig = {
   apiKey: "AIzaSyA0C8dIx0plY4UHOO5K4K0LOO_ZApnnkkA",
   authDomain: "mom-s-fridge-508ae.firebaseapp.com",
@@ -13,12 +12,10 @@ const firebaseConfig = {
   measurementId: "G-CWG0XXRG26"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// HTML Elements
 const loginScreen = document.getElementById('login-screen');
 const mainApp = document.getElementById('main-app');
 const greeting = document.getElementById('greeting');
@@ -30,7 +27,6 @@ const passwordSection = document.getElementById('password-section');
 const momPasswordInput = document.getElementById('mom-password');
 const passwordError = document.getElementById('password-error');
 
-// Log in
 document.getElementById('sibling-login-btn').addEventListener('click', () => {
     localStorage.setItem('isMom', 'false');
     const provider = new GoogleAuthProvider();
@@ -53,16 +49,13 @@ document.getElementById('verify-password-btn').addEventListener('click', () => {
     }
 });
 
-// Log out
 document.getElementById('logout-btn').addEventListener('click', () => {
-    localStorage.removeItem('isMom'); // This line clears the flag!
+    localStorage.removeItem('isMom'); 
     signOut(auth);
 });
 
-// Check who is logged in
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // User is signed in
         loginScreen.style.display = 'none';
         mainApp.style.display = 'block';
         greeting.innerText = `Hello, ${user.displayName}!`;
@@ -70,25 +63,21 @@ onAuthStateChanged(auth, (user) => {
         const isMom = localStorage.getItem('isMom') === 'true';
         
         if (isMom) {
-            // Unhide Mom's special buttons
             momControls.style.display = 'block';
             momPollControls.style.display = 'block';
         } else {
-            // Hide them for siblings
             momControls.style.display = 'none';
             momPollControls.style.display = 'none';
         }
 
-        // Listen for fridge items from the database in real-time
         onSnapshot(collection(db, "fridge"), (snapshot) => {
-            fridgeList.innerHTML = ''; // clear the old list
+            fridgeList.innerHTML = ''; 
             
             snapshot.forEach((docItem) => {
                 const li = document.createElement('li');
                 li.innerText = docItem.data().name;
                 li.style.marginBottom = "8px";
 
-                // If Mom is logged in, add a delete button next to the item
                 if (isMom) {
                     const deleteBtn = document.createElement('button');
                     deleteBtn.innerText = "X";
@@ -106,42 +95,41 @@ onAuthStateChanged(auth, (user) => {
         });
 
     } else {
-        // Nobody is signed in
         loginScreen.style.display = 'block';
         mainApp.style.display = 'none';
     }
 });
 
-// Add Item to Fridge (Mom only)
 document.getElementById('add-item-btn').addEventListener('click', async () => {
     const itemInput = document.getElementById('new-item');
     if (itemInput.value !== "") {
         await addDoc(collection(db, "fridge"), {
             name: itemInput.value
         });
-        itemInput.value = ""; // clear the box
+        itemInput.value = ""; 
     }
 });
 
-// 1. Submit a dinner suggestion
 document.getElementById('submit-note-btn').addEventListener('click', async () => {
     const noteInput = document.getElementById('dinner-note');
     const user = auth.currentUser;
     
     if (noteInput.value !== "" && user) {
+        // UPDATED: Now saving the user's specific UID so they can delete it later
         await addDoc(collection(db, "suggestions"), {
             text: noteInput.value,
-            author: user.displayName
+            author: user.displayName,
+            uid: user.uid 
         });
-        noteInput.value = ""; // clear the box after sending
+        noteInput.value = ""; 
     }
 });
 
-// 2. Listen for suggestions and show them to everyone
 onSnapshot(collection(db, "suggestions"), (snapshot) => {
     const allNotesDiv = document.getElementById('all-notes');
-    allNotesDiv.innerHTML = ''; // clear the old list
+    allNotesDiv.innerHTML = ''; 
     const isMom = localStorage.getItem('isMom') === 'true';
+    const currentUser = auth.currentUser;
     
     snapshot.forEach((docItem) => {
         const data = docItem.data();
@@ -150,8 +138,9 @@ onSnapshot(collection(db, "suggestions"), (snapshot) => {
         
         noteContainer.innerHTML = `<strong style="color: #f4a261;">${data.author}:</strong> ${data.text}`;
         
-        // If Mom is logged in, add a delete button next to the suggestion
-        if (isMom) {
+        // UPDATED: Show delete button if the user is Mom OR if they are the sibling who wrote it
+        const isMyNote = currentUser && data.uid === currentUser.uid;
+        if (isMom || isMyNote) {
             const deleteBtn = document.createElement('button');
             deleteBtn.innerText = "Delete";
             deleteBtn.style.backgroundColor = "#d62828";
@@ -167,27 +156,21 @@ onSnapshot(collection(db, "suggestions"), (snapshot) => {
     });
 });
 
-// --- POLL LOGIC ---
-
-// 1. Mom creates the poll
 document.getElementById('create-poll-btn').addEventListener('click', async () => {
     const opt1 = document.getElementById('poll-option-1').value;
     const opt2 = document.getElementById('poll-option-2').value;
 
     if (opt1 !== "" && opt2 !== "") {
-        // We use a specific document ID called "current" so it always overwrites yesterday's poll
         await setDoc(doc(db, "polls", "current"), {
             option1: { name: opt1, votes: 0 },
             option2: { name: opt2, votes: 0 },
-            voters: [] // An empty list to track who has voted today
+            voters: [] 
         });
-        // Clear the boxes after sending
         document.getElementById('poll-option-1').value = "";
         document.getElementById('poll-option-2').value = "";
     }
 });
 
-// 2. Everyone sees the poll and can vote
 onSnapshot(doc(db, "polls", "current"), (docSnapshot) => {
     const activePollDiv = document.getElementById('active-poll');
     
@@ -195,11 +178,11 @@ onSnapshot(doc(db, "polls", "current"), (docSnapshot) => {
         const data = docSnapshot.data();
         const user = auth.currentUser;
         
-        // Check if the currently logged-in user is already in the voters list
         const hasVoted = user && data.voters.includes(user.uid);
 
-        // Draw the poll on the screen
+        // UPDATED: Added the warning note above the options
         activePollDiv.innerHTML = `
+            <p style="color: #e76f51; font-size: 0.9em; font-style: italic; margin-bottom: 15px;">* if u vote u cant change your vote</p>
             <div style="margin-bottom: 15px; background-color: #4a3b32; padding: 10px; border-radius: 5px;">
                 <strong>${data.option1.name}</strong>: ${data.option1.votes} votes
                 ${!hasVoted ? `<button id="vote-opt1" style="margin-left: 10px;">Vote</button>` : ''}
@@ -211,12 +194,11 @@ onSnapshot(doc(db, "polls", "current"), (docSnapshot) => {
             ${hasVoted ? `<p style="color: #8ab17d; margin-top: 10px;">Thanks for voting!</p>` : ''}
         `;
 
-        // If they haven't voted, make the vote buttons actually add a point
         if (!hasVoted && user) {
             document.getElementById('vote-opt1').addEventListener('click', async () => {
                 await updateDoc(doc(db, "polls", "current"), {
                     "option1.votes": data.option1.votes + 1,
-                    voters: arrayUnion(user.uid) // Adds them to the list so they can't vote again
+                    voters: arrayUnion(user.uid) 
                 });
             });
 
@@ -232,7 +214,6 @@ onSnapshot(doc(db, "polls", "current"), (docSnapshot) => {
     }
 });
 
-// 3. Mom deletes the poll
 document.getElementById('delete-poll-btn').addEventListener('click', async () => {
     await deleteDoc(doc(db, "polls", "current"));
 });
